@@ -1,0 +1,59 @@
+{
+  "versao": "v1",
+  "criado_em": "2026-11-12T21:22:32",
+  "classes": [
+    "cao",
+    "gato",
+    "nenhum"
+  ],
+  "nomes": {
+    "cao": "Cão",
+    "gato": "Gato",
+    "nenhum": "Nem cão nem gato"
+  },
+  "tamanho_entrada": [
+    160,
+    160
+  ],
+  "entrada": "RGB, pixels de 0 a 255 (a normalização está dentro do modelo)",
+  "arquitetura": "MobileNetV2 (ImageNet) + GlobalAveragePooling + Dropout(0.3) + Dense softmax",
+  "treino": {
+    "epocas_executadas": 7,
+    "melhor_epoca": 7,
+    "acuracia_validacao": 0.9867,
+    "camadas_ajuste_fino": 30,
+    "pesos_iniciais": "imagenet"
+  },
+  "dados": {
+    "criado_em": "2026-11-12T21:20:52",
+    "classes": [
+      "cao",
+      "gato",
+      "nenhum"
+    ],
+    "divisao": {
+      "treino": {
+        "cao": 350,
+        "gato": 350,
+        "nenhum": 350
+      },
+      "validacao": {
+        "cao": 75,
+        "gato": 75,
+        "nenhum": 75
+      },
+      "teste": {
+        "cao": 75,
+        "gato": 75,
+        "nenhum": 75
+      }
+    },
+    "imagens_removidas": [],
+    "fontes": {
+      "cao_gato": "zip original cats_vs_dogs (Asirra)",
+      "nenhum": [
+        "imagens sintéticas (cores, formas e ruído) - só para teste"
+      ]
+    }
+  }
+}
