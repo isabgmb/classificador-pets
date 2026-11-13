@@ -108,6 +108,8 @@ def etapa_dados(args):
         comando += ["--n-por-classe", "500"]
     if args.extra_nenhum:
         comando += ["--extra-nenhum", args.extra_nenhum]
+    if args.sem_download:
+        comando += ["--nenhum-sintetico"]
     rodar(*comando)
 
 
@@ -191,6 +193,8 @@ def main():
     parser.add_argument("--novo-treino", action="store_true", help="treina uma nova versão do modelo")
     parser.add_argument("--extra-nenhum", help="pasta raw-img da Animals-10 para a classe 'nenhum'")
     parser.add_argument("--sem-app", action="store_true", help="não sobe o servidor no final")
+    parser.add_argument("--sem-download", action="store_true",
+                        help="não baixa a Imagenette; usa imagens artificiais para 'nenhum' (só teste)")
     args = parser.parse_args()
 
     for fluxo in (sys.stdout, sys.stderr):
