@@ -1,0 +1,10 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+dados/
+dados_brutos/
+dados_app/
+modelos/*/modelo.keras
+modelos/*/melhor_treino.keras

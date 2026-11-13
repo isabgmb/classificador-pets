@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cão ou gato?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --papel: #F3F5F8; --superficie: #FFFFFF; --tinta: #182033; --suave: #5A6275; --linha: #CDD3DE;
+    --cao: #2F5FD0; --gato: #C46A12; --nenhum: #5F6B7A; --erro: #B42318; --foco: #2F5FD0;
+    --titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --texto: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --papel: #10141D; --superficie: #181E2A; --tinta: #E8ECF3; --suave: #A3ABBB; --linha: #2E3647;
+      --cao: #7EA2F5; --gato: #F0A65A; --nenhum: #A3AEBD; --erro: #F97066; --foco: #7EA2F5;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--papel); color: var(--tinta); font: 17px/1.55 var(--texto); }
+  main { max-width: 560px; margin: 0 auto; padding: 48px 20px 64px; }
+  h1 { font: 700 clamp(2.4rem, 8vw, 3.4rem)/1 var(--titulo); letter-spacing: -0.02em; margin: 0 0 12px; }
+  .intro { color: var(--suave); margin: 0 0 32px; max-width: 46ch; }
+
+  .moldura {
+    position: relative; display: grid; place-items: center; aspect-ratio: 4 / 3;
+    border: 2px dashed var(--linha); border-radius: 18px; background: var(--superficie);
+    overflow: hidden; cursor: pointer; transition: border-color .15s;
+  }
+  .moldura:hover, .moldura.arrastando { border-color: var(--cao); }
+  .moldura:focus-within { outline: 3px solid var(--foco); outline-offset: 3px; }
+  .moldura input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .moldura img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .moldura.com-foto { border-style: solid; }
+  .vazia { text-align: center; color: var(--suave); padding: 24px; pointer-events: none; }
+  .vazia strong { display: block; color: var(--tinta); font: 700 1.25rem var(--titulo); margin-bottom: 4px; }
+
+  button {
+    margin-top: 16px; width: 100%; padding: 14px 20px; border: 0; border-radius: 12px;
+    background: var(--tinta); color: var(--papel); font: 700 1.05rem var(--texto); cursor: pointer;
+  }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button:focus-visible { outline: 3px solid var(--foco); outline-offset: 3px; }
+
+  .resultado { margin-top: 36px; }
+  .veredito { font: 700 clamp(3rem, 14vw, 5rem)/0.95 var(--titulo); letter-spacing: -0.03em; margin: 0; }
+  .veredito.cao { color: var(--cao); } .veredito.gato { color: var(--gato); }
+  .veredito.nenhum { color: var(--nenhum); font-size: clamp(2rem, 9vw, 3rem); }
+  .confianca { font-size: 1.1rem; margin: 10px 0 4px; }
+  .fonte { color: var(--suave); margin: 0; }
+  .aviso { margin: 16px 0 0; padding: 12px 14px; border-left: 4px solid var(--gato); background: var(--superficie); }
+  .erro { margin-top: 24px; color: var(--erro); font-weight: 700; }
+
+  .barras { margin: 28px 0 0; padding: 0; list-style: none; }
+  .barras li { display: grid; grid-template-columns: 9.5rem 1fr 3.5rem; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .barras .trilho { height: 10px; border-radius: 5px; background: var(--linha); overflow: hidden; }
+  .barras .preenchido { height: 100%; border-radius: 5px; width: 0; transition: width .5s ease-out; }
+  .barras .valor { text-align: right; font-variant-numeric: tabular-nums; color: var(--suave); }
+  .barras-titulo { margin: 28px 0 8px; font-size: .95rem; color: var(--suave); }
+  footer { margin-top: 56px; color: var(--suave); font-size: .9rem; }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { .barras .preenchido, .moldura { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cão ou gato?</h1>
+  <p class="intro">Envie a foto de um animal. O sistema diz se é um cão, um gato ou nenhum dos dois.</p>
+
+  <label class="moldura" id="moldura">
+    <input type="file" id="arquivo" accept="image/jpeg,image/png,image/webp" aria-label="Escolher foto">
+    <div class="vazia" id="vazia">
+      <strong>Escolha uma foto</strong>
+      ou arraste e solte aqui. JPEG, PNG ou WebP, até 10 MB.
+    </div>
+    <img id="previa" alt="Foto escolhida" hidden>
+  </label>
+  <button id="enviar" disabled>Classificar foto</button>
+
+  <p class="erro" id="erro" role="alert" hidden></p>
+
+  <section class="resultado" id="resultado" aria-live="polite" hidden>
+    <p class="veredito" id="veredito"></p>
+    <p class="confianca" id="confianca"></p>
+    <p class="fonte" id="fonte"></p>
+    <p class="aviso" id="aviso" hidden></p>
+    <p class="barras-titulo">Probabilidades do modelo próprio</p>
+    <ul class="barras" id="barras"></ul>
+  </section>
+
+  <footer id="rodape">Carregando informações do modelo…</footer>
+</main>
+
+<script>
+  const CORES = { cao: "var(--cao)", gato: "var(--gato)", nenhum: "var(--nenhum)" };
+  const el = (id) => document.getElementById(id);
+  let nomes = { cao: "Cão", gato: "Gato", nenhum: "Nem cão nem gato" };
+  let fotoAtual = null;
+
+  fetch("/api/saude").then((r) => r.json()).then((info) => {
+    nomes = info.classes;
+    el("rodape").textContent =
+      `Modelo ${info.versao_modelo}. Fotos com confiança abaixo de ${Math.round(info.limiar * 100)}% ` +
+      (info.gemini_ativo ? "são conferidas pelo Gemini." : "recebem um aviso para conferência.");
+  }).catch(() => { el("rodape").textContent = "Não foi possível falar com o servidor."; });
+
+  function escolher(arquivo) {
+    if (!arquivo) return;
+    fotoAtual = arquivo;
+    const previa = el("previa");
+    previa.src = URL.createObjectURL(arquivo);
+    previa.hidden = false;
+    el("vazia").hidden = true;
+    el("moldura").classList.add("com-foto");
+    el("enviar").disabled = false;
+    el("resultado").hidden = true;
+    el("erro").hidden = true;
+  }
+
+  el("arquivo").addEventListener("change", (e) => escolher(e.target.files[0]));
+  const moldura = el("moldura");
+  moldura.addEventListener("dragover", (e) => { e.preventDefault(); moldura.classList.add("arrastando"); });
+  moldura.addEventListener("dragleave", () => moldura.classList.remove("arrastando"));
+  moldura.addEventListener("drop", (e) => {
+    e.preventDefault();
+    moldura.classList.remove("arrastando");
+    escolher(e.dataTransfer.files[0]);
+  });
+
+  el("enviar").addEventListener("click", async () => {
+    if (!fotoAtual) return;
+    const botao = el("enviar");
+    botao.disabled = true;
+    botao.textContent = "Classificando…";
+    el("erro").hidden = true;
+    try {
+      const dados = new FormData();
+      dados.append("foto", fotoAtual);
+      const resposta = await fetch("/api/classificar", { method: "POST", body: dados });
+      const corpo = await resposta.json();
+      if (!resposta.ok) throw new Error(corpo.detail || "Não foi possível classificar a foto.");
+      mostrar(corpo);
+    } catch (erro) {
+      el("erro").textContent = erro.message;
+      el("erro").hidden = false;
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Classificar foto";
+    }
+  });
+
+  function mostrar(r) {
+    const veredito = el("veredito");
+    veredito.textContent = r.rotulo;
+    veredito.className = "veredito " + r.classe;
+    el("confianca").textContent = `${Math.round(r.confianca * 100)}% de confiança`;
+    el("fonte").textContent = {
+      modelo: `Respondido pelo modelo próprio (${r.modelo.versao}).`,
+      gemini: `Respondido pelo Gemini, porque o modelo próprio ficou em dúvida (${Math.round(r.modelo.confianca * 100)}%).`,
+      modelo_sem_gemini: `Respondido pelo modelo próprio (${r.modelo.versao}).`,
+    }[r.fonte];
+    el("aviso").textContent = r.aviso || "";
+    el("aviso").hidden = !r.aviso;
+
+    const lista = el("barras");
+    lista.innerHTML = "";
+    for (const [classe, prob] of Object.entries(r.modelo.probabilidades)) {
+      const item = document.createElement("li");
+      item.innerHTML = `<span></span><span class="trilho"><span class="preenchido"></span></span><span class="valor"></span>`;
+      item.children[0].textContent = nomes[classe] || classe;
+      item.children[2].textContent = `${(prob * 100).toFixed(1)}%`;
+      const barra = item.querySelector(".preenchido");
+      barra.style.background = CORES[classe] || "var(--suave)";
+      lista.appendChild(item);
+      requestAnimationFrame(() => requestAnimationFrame(() => { barra.style.width = `${prob * 100}%`; }));
+    }
+    el("resultado").hidden = false;
+  }
+</script>
+</body>
+</html>

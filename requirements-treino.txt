@@ -1,0 +1,9 @@
+# Dependências para preparar os dados, treinar e avaliar (inclui as da aplicação)
+-r requirements-app.txt
+tensorflow>=2.16
+tensorflow-datasets>=4.9
+importlib_resources>=6.0  # exigido pelo tensorflow-datasets, mas nem sempre instalado junto
+scikit-learn>=1.3
+matplotlib>=3.8
+pytest>=8.0
+httpx>=0.27

@@ -1,0 +1,1 @@
+As versões treinadas ficam aqui (v1/, v2/...). Gere com treino/treinar.py ou descompacte o v1.zip do Colab nesta pasta.
